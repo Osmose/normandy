@@ -141,10 +141,6 @@ class Recipe(DirtyFieldsMixin, models.Model):
         return self.latest_revision.updated
 
     @latest_revision_property
-    def filter_expression(self):
-        return self.latest_revision.filter_expression
-
-    @latest_revision_property
     def channels(self):
         return self.latest_revision.channels
 
@@ -282,29 +278,6 @@ class RecipeRevision(models.Model):
         }
 
     @property
-    def filter_expression(self):
-        parts = []
-
-        if self.locales.count():
-            locales = ', '.join(["'{}'".format(l.code) for l in self.locales.all()])
-            parts.append('normandy.locale in [{}]'.format(locales))
-
-        if self.countries.count():
-            countries = ', '.join(["'{}'".format(c.code) for c in self.countries.all()])
-            parts.append('normandy.country in [{}]'.format(countries))
-
-        if self.channels.count():
-            channels = ', '.join(["'{}'".format(c.slug) for c in self.channels.all()])
-            parts.append('normandy.channel in [{}]'.format(channels))
-
-        if self.extra_filter_expression:
-            parts.append(self.extra_filter_expression)
-
-        expression = ') && ('.join(parts)
-
-        return '({})'.format(expression) if len(parts) > 1 else expression
-
-    @property
     def arguments(self):
         return json.loads(self.arguments_json)
 
@@ -319,8 +292,17 @@ class RecipeRevision(models.Model):
         return recipe
 
     def hash(self):
-        data = '{}{}{}{}{}{}'.format(self.recipe.id, self.created, self.name, self.action.id,
-                                     self.arguments_json, self.filter_expression)
+        data = ''.join([
+            str(self.recipe.id),
+            str(self.created),
+            self.name,
+            str(self.action.id),
+            self.arguments_json,
+            ''.join(c.slug for c in self.channels.all()),
+            ''.join(c.code for c in self.countries.all()),
+            ''.join(l.code for l in self.locales.all()),
+            self.extra_filter_expression,
+        ])
         return hashlib.sha256(data.encode()).hexdigest()
 
     def save(self, *args, **kwargs):

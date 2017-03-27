@@ -60,44 +60,6 @@ class TestRecipe(object):
         recipe.save()
         assert recipe.revision_id == revision_id
 
-    def test_filter_expression(self):
-        channel1 = ChannelFactory(slug='beta', name='Beta')
-        channel2 = ChannelFactory(slug='release', name='Release')
-        country1 = CountryFactory(code='US', name='USA')
-        country2 = CountryFactory(code='CA', name='Canada')
-        locale1 = LocaleFactory(code='en-US', name='English (US)')
-        locale2 = LocaleFactory(code='fr-CA', name='French (CA)')
-
-        r = RecipeFactory()
-        assert r.filter_expression == ''
-
-        r = RecipeFactory(channels=[channel1])
-        assert r.filter_expression == "normandy.channel in ['beta']"
-
-        r.update(channels=[channel1, channel2])
-        assert r.filter_expression == "normandy.channel in ['beta', 'release']"
-
-        r = RecipeFactory(countries=[country1])
-        assert r.filter_expression == "normandy.country in ['US']"
-
-        r.update(countries=[country1, country2])
-        assert r.filter_expression == "normandy.country in ['CA', 'US']"
-
-        r = RecipeFactory(locales=[locale1])
-        assert r.filter_expression == "normandy.locale in ['en-US']"
-
-        r.update(locales=[locale1, locale2])
-        assert r.filter_expression == "normandy.locale in ['en-US', 'fr-CA']"
-
-        r = RecipeFactory(extra_filter_expression='2 + 2 == 4')
-        assert r.filter_expression == '2 + 2 == 4'
-
-        r.update(channels=[channel1], countries=[country1], locales=[locale1])
-        assert r.filter_expression == ("(normandy.locale in ['en-US']) && "
-                                       "(normandy.country in ['US']) && "
-                                       "(normandy.channel in ['beta']) && "
-                                       "(2 + 2 == 4)")
-
     def test_canonical_json(self):
         recipe = RecipeFactory(
             action=ActionFactory(name='action'),
@@ -115,6 +77,7 @@ class TestRecipe(object):
             "(normandy.locale in ['en-US']) && (normandy.country in ['CA']) && "
             "(normandy.channel in ['beta']) && (2 + 2 == 4)"
         )
+        last_updated = recipe.last_updated.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         expected = (
             '{'
             '"action":"action",'
@@ -123,19 +86,14 @@ class TestRecipe(object):
             '"countries":["CA"],'
             '"enabled":false,'
             '"extra_filter_expression":"2 + 2 == 4",'
-            '"filter_expression":"%(filter_expression)s",'
-            '"id":%(id)s,'
-            '"last_updated":"%(last_updated)s",'
+            f'"filter_expression":"{filter_expression}",'
+            f'"id":{recipe.id},'
+            f'"last_updated":"{last_updated}",'
             '"locales":["en-US"],'
             '"name":"canonical",'
-            '"revision_id":"%(revision_id)s"'
+            f'"revision_id":"{recipe.revision_id}"'
             '}'
-        ) % {
-            'id': recipe.id,
-            'revision_id': recipe.revision_id,
-            'last_updated': recipe.last_updated.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-            'filter_expression': filter_expression
-        }
+        )
         expected = expected.encode()
         assert recipe.canonical_json() == expected
 
@@ -230,8 +188,7 @@ class TestRecipe(object):
         assert recipe.action == a2
         assert recipe.name == 'changed'
         assert recipe.arguments == {'message': 'something'}
-        assert recipe.filter_expression == ("(normandy.channel in ['beta']) && "
-                                            "(something !== undefined)")
+        assert recipe.extra_filter_expression == 'something !== undefined'
 
     def test_recipe_doesnt_update_when_clean(self):
         channel = ChannelFactory()

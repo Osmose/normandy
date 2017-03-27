@@ -31,7 +31,7 @@ class TestRecipeSerializer:
             'last_updated': Whatever(),
             'enabled': recipe.enabled,
             'extra_filter_expression': recipe.extra_filter_expression,
-            'filter_expression': recipe.filter_expression,
+            'filter_expression': Whatever(),
             'revision_id': recipe.revision_id,
             'action': action.name,
             'arguments': {
@@ -131,6 +131,54 @@ class TestRecipeSerializer:
         }
         assert serializer.errors == {}
 
+        def test_generate_filter_expression(self):
+            channel1 = ChannelFactory(slug='beta', name='Beta')
+            channel2 = ChannelFactory(slug='release', name='Release')
+            country1 = CountryFactory(code='US', name='USA')
+            country2 = CountryFactory(code='CA', name='Canada')
+            locale1 = LocaleFactory(code='en-US', name='English (US)')
+            locale2 = LocaleFactory(code='fr-CA', name='French (CA)')
+
+            serializer = RecipeSerializer()
+            r = RecipeFactory()
+            expression = serializer.generate_filter_expression(r)
+            assert expression == ''
+
+            r = RecipeFactory(channels=[channel1])
+            expression = serializer.generate_filter_expression(r)
+            assert expression == "normandy.channel in ['beta']"
+
+            r.update(channels=[channel1, channel2])
+            expression = serializer.generate_filter_expression(r)
+            assert expression == "normandy.channel in ['beta', 'release']"
+
+            r = RecipeFactory(countries=[country1])
+            expression = serializer.generate_filter_expression(r)
+            assert expression == "normandy.country in ['US']"
+
+            r.update(countries=[country1, country2])
+            expression = serializer.generate_filter_expression(r)
+            assert expression == "normandy.country in ['CA', 'US']"
+
+            r = RecipeFactory(locales=[locale1])
+            expression = serializer.generate_filter_expression(r)
+            assert expression == "normandy.locale in ['en-US']"
+
+            r.update(locales=[locale1, locale2])
+            expression = serializer.generate_filter_expression(r)
+            assert expression == "normandy.locale in ['en-US', 'fr-CA']"
+
+            r = RecipeFactory(extra_filter_expression='2 + 2 == 4')
+            expression = serializer.generate_filter_expression(r)
+            assert expression == '2 + 2 == 4'
+
+            r.update(channels=[channel1], countries=[country1], locales=[locale1])
+            expression = serializer.generate_filter_expression(r)
+            assert expression == (
+                "(normandy.locale in ['en-US']) && (normandy.country in ['US']) && "
+                "(normandy.channel in ['beta']) && (2 + 2 == 4)"
+            )
+
 
 @pytest.mark.django_db()
 class TestActionSerializer:
@@ -172,7 +220,7 @@ class TestSignedRecipeSerializer:
                 'id': recipe.id,
                 'enabled': recipe.enabled,
                 'extra_filter_expression': recipe.extra_filter_expression,
-                'filter_expression': recipe.filter_expression,
+                'filter_expression': Whatever(),
                 'revision_id': recipe.revision_id,
                 'action': action.name,
                 'arguments': recipe.arguments,

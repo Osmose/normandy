@@ -41,7 +41,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     locales = serializers.SlugRelatedField(slug_field='code', queryset=Locale.objects.all(),
                                            many=True, required=False)
     extra_filter_expression = serializers.CharField()
-    filter_expression = serializers.CharField(read_only=True)
+    filter_expression = serializers.SerializerMethodField('generate_filter_expression')
 
     class Meta:
         model = Recipe
@@ -136,6 +136,30 @@ class RecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(errorResponse)
 
         return value
+
+    def generate_filter_expression(self, recipe):
+        # Recipe.latest_revision can be null, which means anything we need to
+        # generated a filter expression isn't available.
+        if recipe.latest_revision is None:
+            return ''
+
+        parts = []
+        if recipe.locales.count():
+            locales = ', '.join(f"'{l.code}'" for l in recipe.locales.all())
+            parts.append(f'normandy.locale in [{locales}]')
+
+        if recipe.countries.count():
+            countries = ', '.join(f"'{c.code}'" for c in recipe.countries.all())
+            parts.append(f'normandy.country in [{countries}]')
+
+        if recipe.channels.count():
+            channels = ', '.join(f"'{c.slug}'" for c in recipe.channels.all())
+            parts.append(f'normandy.channel in [{channels}]')
+
+        if recipe.extra_filter_expression:
+            parts.append(recipe.extra_filter_expression)
+
+        return ' && '.join(f'({part})' for part in parts)
 
 
 class ClientSerializer(serializers.Serializer):
