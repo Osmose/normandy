@@ -75,7 +75,7 @@
 }
 
 
-#secondary-header {
+.secondary-header {
   background-color: $secondaryColor;
   border-top: 1px solid #FFF;
   margin: 0 0 30px;
@@ -149,10 +149,6 @@
 /* Add & Edit Forms */
 .recipe-form {
   padding: 30px 45px;
-
-  &.loading {
-    text-align: center;
-  }
 
   .form-field {
     clear: both;
@@ -455,4 +451,18 @@
   position: fixed;
   right: 2em;
   width: auto;
+}
+
+.notice {
+  padding: 2em;
+  text-align: center;
+}
+
+.pagination {
+  padding: 1em;
+  text-align: right;
+
+  .fa {
+    margin: 0 0.5em;
+  }
 }
