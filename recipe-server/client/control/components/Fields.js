@@ -110,3 +110,7 @@ buildErrorMessageField.propTypes = {
     error: pt.oneOfType([pt.string, pt.array]),
   }).isRequired,
 };
+
+export class FileInput extends React.Component {
+
+}

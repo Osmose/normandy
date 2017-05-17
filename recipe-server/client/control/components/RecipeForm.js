@@ -90,7 +90,7 @@ export class RecipeForm extends React.Component {
   };
 
   static LoadingSpinner = (
-    <div className="recipe-form loading">
+    <div className="control-form loading">
       <i className="fa fa-spinner fa-spin fa-3x fa-fw" />
       <p>Loading recipe...</p>
     </div>
@@ -347,7 +347,7 @@ export class RecipeForm extends React.Component {
     const statusText = renderVars.isEnabled ? 'Enabled' : 'Disabled';
 
     return (
-      <form className="recipe-form" onSubmit={handleSubmit}>
+      <form className="control-form" onSubmit={handleSubmit}>
         { RecipeForm.renderCloningMessage(this.props) }
         {
           revision &&

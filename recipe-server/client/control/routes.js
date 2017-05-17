@@ -1,6 +1,7 @@
 import React from 'react';
 import { IndexRedirect, IndexRoute, Route } from 'react-router';
 import ControlApp from 'control/components/ControlApp';
+import ExtensionFormPage from 'control/components/extensions/ExtensionFormPage';
 import ExtensionListPage from 'control/components/extensions/ExtensionListPage';
 import RecipeList from 'control/components/RecipeList';
 import RecipeForm from 'control/components/RecipeForm';
@@ -95,6 +96,16 @@ export default (
         ctaButtons={[
           { text: 'Add New', icon: 'plus', link: 'new/' },
         ]}
+      />
+      <Route
+        path="new/"
+        name="Upload Extension"
+        component={ExtensionFormPage}
+      />
+      <Route
+        path=":extensionId/"
+        name="Edit Extension"
+        component={ExtensionFormPage}
       />
     </Route>
     <Route path="*" component={NoMatch} />

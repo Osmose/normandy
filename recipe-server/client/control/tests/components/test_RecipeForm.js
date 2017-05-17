@@ -24,7 +24,7 @@ function propFactory(props = {}) {
 describe('<RecipeForm>', () => {
   it("should show a loading indicator if the recipe hasn't loaded yet", () => {
     const wrapper = shallow(<RecipeForm recipeId={1} {...propFactory()} />);
-    expect(wrapper.hasClass('recipe-form loading')).toBe(true);
+    expect(wrapper.hasClass('loading')).toBe(true);
   });
 
   describe('Argument fields', () => {

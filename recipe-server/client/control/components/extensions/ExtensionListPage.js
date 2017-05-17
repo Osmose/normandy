@@ -1,18 +1,7 @@
 import React, { PropTypes as pt } from 'react';
 import { Link, PropTypes as routerPt } from 'react-router';
 import { isEqual } from 'underscore';
-
-function apiFetch(input, init) {
-  return fetch(input, {
-    credentials: 'same-origin',
-    headers: {
-      'X-CSRFToken': document.getElementsByTagName('html')[0].dataset.csrf,
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    ...init,
-  });
-}
+import { apiFetch } from './utils';
 
 /**
  * Container for state related to the extension listing. Handles fetching data
