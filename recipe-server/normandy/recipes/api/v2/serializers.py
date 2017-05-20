@@ -60,6 +60,9 @@ class RecipeRevisionSerializer(serializers.ModelSerializer):
             'date_created',
             'id',
             'recipe',
+            'is_latest',
+            'enabled',
+            'is_archived',
         ]
 
     def get_recipe(self, instance):
@@ -70,9 +73,7 @@ class RecipeRevisionSerializer(serializers.ModelSerializer):
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    action = serializers.SerializerMethodField(read_only=True)
-    action_id = serializers.PrimaryKeyRelatedField(
-        source='action', queryset=Action.objects.all(), write_only=True)
+    action = serializers.SlugRelatedField(slug_field='name', queryset=Action.objects.all())
     approval_request = ApprovalRequestSerializer(read_only=True)
     approved_revision = RecipeRevisionSerializer(read_only=True)
     arguments = serializers.JSONField()
@@ -93,7 +94,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = [
             'action',
-            'action_id',
             'approval_request',
             'approved_revision',
             'arguments',
@@ -118,11 +118,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             for field in exclude_fields:
                 if field in self.fields:
                     self.fields.pop(field)
-
-    def get_action(self, instance):
-        serializer = ActionSerializer(
-            instance.action, read_only=True, context={'request': self.context.get('request')})
-        return serializer.data
 
     def update(self, instance, validated_data):
         instance.revise(**validated_data)
@@ -154,7 +149,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def validate_arguments(self, value):
         # Get the schema associated with the selected action
         try:
-            schema = Action.objects.get(pk=self.initial_data.get('action_id')).arguments_schema
+            schema = Action.objects.get(name=self.initial_data.get('action')).arguments_schema
         except:
             raise serializers.ValidationError('Could not find arguments schema.')
 

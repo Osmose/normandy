@@ -5,17 +5,18 @@
   "main": "index.js",
   "author": "Mike Cooper <mcooper@mozilla.com>",
   "repository": "https://github.com/mozilla/normandy-addon",
-  "scripts": {
-  },
+  "scripts": {},
   "license": "MPL-2.0",
   "devDependencies": {
     "babel-eslint": "6.1.2",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
     "eslint": "^3.8.1",
     "eslint-config-normandy": "1.0.0",
     "eslint-plugin-babel": "3.3.0",
     "eslint-plugin-mozilla": "0.2.5"
   },
   "dependencies": {
+    "autobind-decorator": "^1.4.1",
     "jexl": "1.1.4"
   }
 }

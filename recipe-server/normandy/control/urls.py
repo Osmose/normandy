@@ -26,5 +26,20 @@ if settings.ADMIN_ENABLED:
                 name='logout'
             ),
             url(r'^.*$', views.IndexView, name='index'),
+        ])),
+        url(r'^control2/', include([
+            url(
+                'login',
+                login,
+                {'template_name': 'control/admin/login.html'},
+                name='login2'
+            ),
+            url(
+                'logout',
+                logout_then_login,
+                {'login_url': reverse_lazy('control:login2')},
+                name='logout2'
+            ),
+            url(r'^.*$', views.IndexView2, name='index2'),
         ]))
     ]

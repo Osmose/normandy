@@ -100,6 +100,8 @@ class Core(Configuration):
             'normandy.base.api.renderers.CustomBrowsableAPIRenderer',
         ),
         'EXCEPTION_HANDLER': 'normandy.base.api.views.exception_handler',
+        'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+        'PAGE_SIZE': 10
     }
 
     WEBPACK_LOADER = {

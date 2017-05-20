@@ -332,7 +332,7 @@ class RecipeRevision(models.Model):
             'locales': list(self.locales.all()),
         }
 
-    @property
+    @cached_property
     def filter_expression(self):
         parts = []
 
@@ -363,10 +363,10 @@ class RecipeRevision(models.Model):
     def arguments(self, value):
         self.arguments_json = json.dumps(value)
 
-    @property
+    @cached_property
     def serializable_recipe(self):
         """Returns an unsaved recipe object with this revision's data to be serialized."""
-        recipe = self.recipe
+        recipe = Recipe.objects.get(pk=self.recipe.pk)
         recipe.approved_revision = self if self.approval_status == self.APPROVED else None
         recipe.latest_revision = self
         return recipe
@@ -382,6 +382,18 @@ class RecipeRevision(models.Model):
                 return self.PENDING
         except ApprovalRequest.DoesNotExist:
             return None
+
+    @property
+    def is_latest(self):
+        return self.recipe.latest_revision == self
+
+    @property
+    def is_archived(self):
+        return self.recipe.approved_revision != self
+
+    @property
+    def enabled(self):
+        return self.recipe.approved_revision == self and self.recipe.enabled
 
     def hash(self):
         data = '{}{}{}{}{}{}'.format(self.recipe.id, self.created, self.name, self.action.id,

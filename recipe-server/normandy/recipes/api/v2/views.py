@@ -6,7 +6,7 @@ from rest_framework.decorators import detail_route
 from rest_framework.response import Response
 
 from normandy.base.api import UpdateOrCreateModelViewSet
-from normandy.base.api.filters import CaseInsensitiveBooleanFilter
+from normandy.base.api.filters import AliasedOrderingFilter, CaseInsensitiveBooleanFilter
 from normandy.base.api.mixins import CachingViewsetMixin
 from normandy.base.api.permissions import AdminEnabledOrReadOnly
 from normandy.base.decorators import api_cache_control, reversion_transaction
@@ -38,11 +38,21 @@ class RecipeFilters(django_filters.FilterSet):
         fields = ['latest_revision__action', 'enabled']
 
 
+class RecipeOrderingFilter(AliasedOrderingFilter):
+    aliases = {
+        'last_updated': ('latest_revision__updated', 'Last Updated'),
+        'name': ('latest_revision__name', 'Name'),
+    }
+
+
 class RecipeViewSet(CachingViewsetMixin, UpdateOrCreateModelViewSet):
     """Viewset for viewing and uploading recipes."""
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     filter_class = RecipeFilters
+    filter_backends = [
+        RecipeOrderingFilter,
+    ]
     permission_classes = [
         permissions.DjangoModelPermissionsOrAnonReadOnly,
         AdminEnabledOrReadOnly,
@@ -79,8 +89,11 @@ class RecipeViewSet(CachingViewsetMixin, UpdateOrCreateModelViewSet):
     @api_cache_control()
     def history(self, request, pk=None):
         recipe = self.get_object()
-        serializer = RecipeRevisionSerializer(recipe.revisions.all(), many=True,
-                                              context={'request': request})
+        revisions = (
+            recipe.revisions
+            .prefetch_related('countries', 'locales', 'channels')
+        )
+        serializer = RecipeRevisionSerializer(revisions, many=True, context={'request': request})
         return Response(serializer.data)
 
     @reversion_transaction

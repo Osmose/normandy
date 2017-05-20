@@ -47,12 +47,16 @@ if (production) {
 module.exports = [
   {
     context: __dirname,
-    devtool: production ? undefined : 'cheap-module-source-map',
+    devtool: production ? undefined : 'source-map',
 
     entry: {
       selfrepair: [
         'babel-polyfill',
         './client/selfrepair/self_repair.js',
+      ],
+      control2: [
+        'babel-polyfill',
+        './client/control2/index.js',
       ],
       control: [
         'babel-polyfill',
@@ -94,6 +98,10 @@ module.exports = [
           loader: ExtractTextPlugin.extract('style', 'css?sourceMap!postcss!sass?sourceMap'),
         },
         {
+          test: /\.css$/,
+          loader: ExtractTextPlugin.extract('style', 'css?sourceMap!postcss'),
+        },
+        {
           test: /\.(ttf|eot|svg|woff(2)?)(\?[a-z0-9=&.]+)?$/,
           loader: 'file-loader',
         },
@@ -107,6 +115,7 @@ module.exports = [
         control: path.resolve(__dirname, './client/control'),
         selfrepair: path.resolve(__dirname, './client/selfrepair'),
         tests: path.resolve(__dirname, './client/tests'),
+        control2: path.resolve(__dirname, './client/control2'),
       },
     },
   },

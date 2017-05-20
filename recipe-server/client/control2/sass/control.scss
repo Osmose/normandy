@@ -1,0 +1,248 @@
+@import '~antd/dist/antd.css';
+
+$fa-font-path: "~font-awesome/fonts"; /* Required for Font Awesome */
+
+@import '~font-awesome/scss/font-awesome.scss';
+
+%clearfix {
+  &::after {
+    clear: both;
+    content: "";
+    display: block;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: #ECECEC;
+}
+
+.content {
+  min-height: 350px;
+  padding: 15px;
+}
+
+.listing-page,
+.form-page,
+.view-page,
+.review-page {
+  background: #FFF;
+  padding: 15px;
+}
+
+.page-breadcrumb {
+  font-size: 1.2em;
+  margin-bottom: 15px;
+  margin-left: 2px;
+}
+
+/* Centered message when loading data or when an error has occurred. */
+.notice-message {
+  align-items: center;
+  background: rgba(200, 200, 200, 0.3);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 1000;
+}
+
+/* 15px padding between top-level elements in listing. */
+.listing-page > * + * {
+  margin-top: 15px;
+}
+
+/* Override for anticons to use FontAwesome instead. */
+%ant-fa-override {
+  @extend .fa;
+
+  &::before {
+    font-family: FontAwesome !important;
+  }
+
+  &::after {
+    display: none;
+  }
+}
+
+.ant-pagination-prev a {
+  @extend %ant-fa-override;
+  @extend .fa-chevron-left;
+}
+
+.ant-pagination-next a {
+  @extend %ant-fa-override;
+  @extend .fa-chevron-right;
+}
+
+.ant-select-arrow {
+  @extend %ant-fa-override;
+  @extend .fa-caret-down;
+
+  font-size: 18px !important;
+  line-height: 14px !important;
+}
+
+.anticon {
+  @extend %ant-fa-override;
+
+  &.anticon-caret-up {
+    @extend .fa-caret-up;
+  }
+
+  &.anticon-caret-down {
+    @extend .fa-caret-down;
+  }
+
+  &.anticon-search {
+    @extend .fa-search;
+  }
+
+  &.anticon-filter {
+    @extend .fa-filter;
+  }
+
+  &.anticon-check-circle {
+    @extend .fa-check-circle;
+  }
+
+  &.anticon-exclamation-circle {
+    @extend .fa-exclamation-circle;
+  }
+
+  &.anticon-cross-circle {
+    @extend .fa-times-circle;
+  }
+}
+
+/* Enlarge column sorter arrows to a reasonable size. */
+.ant-table-column-sorter .anticon::before {
+  font-size: 32px;
+  line-height: 0;
+}
+.ant-table-column-sorter-up,
+.ant-table-column-sorter-down {
+  height: 10px;
+}
+
+/* Make column filter icon a visible size. */
+.ant-table-thead .ant-dropdown-trigger::before {
+  font-size: 16px;
+}
+
+.list-action-bar {
+  display: flex;
+  flex-direction: row;
+
+  & > * + * {
+    margin-left: 15px;
+  }
+
+  .search {
+    flex: 1;
+  }
+
+}
+
+/* Give some space between icons within buttons */
+.ant-btn > span + .fa,
+.ant-btn > .fa + span {
+  margin-left: 0.5em;
+}
+
+.form-actions {
+  @extend %clearfix;
+
+  background: #FBFBFB;
+  border: 1px solid #D9D9D9;
+  padding: 15px;
+
+  .primary {
+    float: right;
+  }
+
+  .secondary {
+    float: left;
+  }
+
+  .primary > * + *,
+  .secondary > * + * {
+    margin-left: 15px;
+  }
+}
+
+fieldset {
+  border: none;
+}
+
+.form-page,
+.view-page {
+  display: flex;
+
+  .recipe-form,
+  .recipe-view {
+    flex: 1;
+  }
+}
+
+.recipe-history {
+  border-left: 1px solid #D9D9D9;
+  flex: 0 0 300px;
+  margin-left: 15px;
+  padding: 15px;
+
+  .heading {
+    margin-bottom: 15px;
+  }
+
+  .selected {
+    background: #ECECEC;
+  }
+
+  /* Remove padding from custom icons (we don't need it) */
+  .ant-timeline-item-head-custom {
+    padding: 0;
+  }
+}
+
+.recipe-history-icon-selected {
+  @extend .fa;
+  @extend .fa-circle;
+
+  &::before {
+    color: #108EE9;
+    font-size: 1.3em;
+  }
+}
+
+.revision-info .hash {
+  margin-right: 8px;
+}
+
+.recipe-view {
+  .actions {
+    background: #FBFBFB;
+    border: 1px solid #D9D9D9;
+    float: right;
+    margin: 0 0 15px 15px;
+    padding: 15px;
+    width: 300px;
+
+    /* Action buttons should be 100% width and spaced apart. */
+    .ant-btn {
+      margin-top: 15px;
+      width: 100%;
+    }
+  }
+}
+
+pre {
+  background: #ECECEC;
+  padding: 15px;
+}
