@@ -17,6 +17,8 @@ XPCOMUtils.defineLazyModuleGetter(this, "CleanupManager",
   "resource://shield-recipe-client/lib/CleanupManager.jsm");
 XPCOMUtils.defineLazyModuleGetter(this, "PreferenceExperiments",
   "resource://shield-recipe-client/lib/PreferenceExperiments.jsm");
+XPCOMUtils.defineLazyModuleGetter(this, "AboutPages",
+  "chrome://shield-recipe-client/content/AboutPages.jsm");
 
 this.EXPORTED_SYMBOLS = ["ShieldRecipeClient"];
 
@@ -43,6 +45,12 @@ const DEFAULT_PREFS = {
 const PREF_DEV_MODE = "extensions.shield-recipe-client.dev_mode";
 const PREF_SELF_SUPPORT_ENABLED = "browser.selfsupport.enabled";
 const PREF_LOGGING_LEVEL = PREF_BRANCH + "logging.level";
+
+// Due to bug 1051238 frame scripts are cached forever, so we can't update them
+// as a restartless add-on. The Math.random() is the work around for this.
+const PROCESS_SCRIPT = (
+  `chrome://shield-recipe-client/content/shield-content-process.js?${Math.random()}`
+);
 
 let log = null;
 
@@ -73,6 +81,15 @@ this.ShieldRecipeClient = {
       }
     }
 
+    // Register frame script ro run in child processes to register about: pages.
+    Services.ppmm.loadProcessScript(PROCESS_SCRIPT, true);
+    CleanupManager.addCleanupHandler(() => {
+      // Although the ppmm loads the scripts into the chrome process as well,
+      // we need to manually unregister in the parent process anyway to ensure
+      // these aren't part of the chrome process and avoid errors.
+      AboutPages.aboutStudies.unregister();
+    });
+
     // Initialize experiments first to avoid a race between initializing prefs
     // and recipes rolling back pref changes when experiments end.
     try {
@@ -85,6 +102,9 @@ this.ShieldRecipeClient = {
   },
 
   shutdown(reason) {
+    // Notify child processes that the add-on is shutting down.
+    Services.ppmm.broadcastAsyncMessage("ShieldShuttingDown");
+
     CleanupManager.cleanup();
 
     // Re-enable self-support if we're being disabled.
