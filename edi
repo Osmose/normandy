@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -e
+
+PYTHON="$(type python3.6 > /dev/null && echo "python3.6" || echo "python")"
+REPO_ROOT="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
+
+VIRTUALENV_ACTIVE="$($PYTHON -c "import sys; print('1' if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix) else '0')")"
+if [[ $VIRTUALENV_ACTIVE == "0" ]]; then
+    VIRTUALENV_DIR="${REPO_ROOT}/.edi/virtualenv"
+    if [[ ! -e $VIRTUALENV_DIR ]]; then
+        mkdir -p "$VIRTUALENV_DIR"
+        eval $PYTHON -m venv $VIRTUALENV_DIR
+    fi
+    source "$VIRTUALENV_DIR/bin/activate"
+fi
+
+if ! type edi > /dev/null 2>&1; then
+    pip install -e "$REPO_ROOT/edi_package/"
+fi
+
+edi "$@"
