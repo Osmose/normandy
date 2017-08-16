@@ -181,9 +181,13 @@ XPCOMUtils.defineLazyGetter(this.AboutPages, "aboutStudies", () => {
      *   that requested a study list.
      */
     async sendStudyList(target) {
-      target.messageManager.sendAsyncMessage("Shield:ReceiveStudyList", {
-        studies: await AddonStudies.getAll(),
-      });
+      try {
+        target.messageManager.sendAsyncMessage("Shield:ReceiveStudyList", {
+          studies: await AddonStudies.getAll(),
+        });
+      } catch (err) {
+        // This might fail if the remote process is gone, which is fine.
+      }
     },
 
     /**
